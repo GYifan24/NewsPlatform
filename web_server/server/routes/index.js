@@ -7,4 +7,5 @@ router.get('/', function(req, res, next) {
   res.sendFile('index.html', { root: path.join(__dirname, '../../client/build/')});
 });
 
+app.listen(3000, () => console.log('Server running on port 3000'))
 module.exports = router;

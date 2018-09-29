@@ -4,19 +4,18 @@ import 'materialize-css/dist/js/materialize.min.js';
 import React from 'react';
 import App from '../App/App';
 import LoginPage from '../Login/LoginPage';
-import SignUpPage from '../SignUp/SignUp';
+import SignUpPage from '../SignUp/SignUpPage';
 import Auth from '../Auth/Auth';
-
-import {BrowserRouter as Router, Router, Link} from 'react-router-dom';
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 
 import './Base.css';
 
 const logout = () => {
   Auth.deauthenticateUser();
   window.location.replace('/login');
-};
+}
 
-const Base = () {
+const Base = () => (
   <Router>
     <div>
       <nav className="nav-bar indigo lighten-1">
@@ -24,30 +23,26 @@ const Base = () {
           <a href="/" className="brand-logo"> Tap News</a>
           <ul id="nav-mobile" className="right">
             {Auth.isUserAuthenticated() ?
-              (
-              <div>
+              (<div>
                 <li>{Auth.getEmail()}</li>
                 <li><a onClick={logout}>Log out</a></li>
-              </div>
-            )
-            :
-            (
-            <div>
-              <li><Link to="/login">Log in</Link></li>
-              <li><Link to="/signup">Sign up</Link></li>
-            </div>
-            )
+              </div>)
+              :
+              (<div>
+                <li><Link to="/login">Log in</Link></li>
+                <li><Link to="/signup">Sign up</Link></li>
+              </div>)
             }
-          </ur>
+          </ul>
         </div>
       </nav>
       <br/>
-      <Route exact path='/' render{() => (Auth.isUserAuthenticated() ?
+      <Route exact path="/" render={() => (Auth.isUserAuthenticated() ?
         (<App />) : (<LoginPage />))}/>
       <Route exact path="/login" component={LoginPage} />
-      <Route exact path="/signup" component={SignUpPage}/>
+      <Route exact path="/signup" component={SignUpPage} />
     </div>
   </Router>
-};
+);
 
 export default Base;

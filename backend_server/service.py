@@ -1,14 +1,6 @@
 """ Backend service """
 import logging
-import json
-import sys
-import os
-
-
-from bson.json_util import dumps
-sys.path.append(os.path.join(os.path.dirname(__file__), 'utils'))
-import mongodb_client
-# import operations
+import operations
 
 from jsonrpclib.SimpleJSONRPCServer import SimpleJSONRPCServer
 
@@ -26,16 +18,25 @@ def add(num1, num2):
     LOGGER.debug("add is called with %d and %d", num1, num2)
     return num1 + num2
 
-def getOneNews():
+
+def get_one_news():
+    """ Test method to get one news """
     LOGGER.debug("getOneNews is called")
-    res = mongodb_client.get_db()['news'].find_one()
-    return json.loads(dumps(res))
+    return operations.getOneNews()
+
+
+def getNewsSummariesForUser(user_id, page_num):
+    """ Get news summaries for a user """
+    LOGGER.debug("get_news_summaries_for_user is called with %s and %s", user_id, page_num)
+    return operations.getNewsSummariesForUser(user_id, page_num)
+
 
 # Threading RPC Server
 RPC_SERVER = SimpleJSONRPCServer((SERVER_HOST, SERVER_PORT))
 RPC_SERVER.register_function(add, 'add')
-RPC_SERVER.register_function(getOneNews, 'getOneNews')
-# RPC_SERVER.register_function(get_one_news, 'getOneNews')
+RPC_SERVER.register_function(get_one_news, 'getOneNews')
+RPC_SERVER.register_function(getNewsSummariesForUser, 'getNewsSummariesForUser')
+
 
 LOGGER.info("Starting RPC server on %s:%d", SERVER_HOST, SERVER_PORT)
 

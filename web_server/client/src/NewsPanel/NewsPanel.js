@@ -1,5 +1,6 @@
 import './NewsPanel.css';
 
+import Auth from '../Auth/Auth';
 import NewsCard from '../NewsCard/NewsCard';
 import React from 'react';
 import _ from 'lodash';
@@ -7,7 +8,7 @@ import _ from 'lodash';
 class NewsPanel extends React.Component {
   constructor() {
     super();
-    this.state = { news:null };
+    this.state = { news:null, pageNum:1, loadedAll:false };
   }
 
   componentDidMount() {
@@ -27,14 +28,29 @@ class NewsPanel extends React.Component {
   loadMoreNews() {
     console.log('Actually triggered loading more news');
 
-    const news_url = 'http://' + window.location.hostname + ':3000/news'
-    const request = new Request(news_url, { method: 'GET' });
+    if (this.state.loadedAll == true){
+      return;
+    }
+
+    const news_url = 'http://' + window.location.hostname +
+      ':3000/news/userId=' + Auth.getEmail() + "&pageNum=" + this.state.pageNum;
+
+    const request = new Request(encodeURI(news_url), {
+      method: 'GET',
+      headers: {
+        'Authorization': 'bearer ' + Auth.getToken(),
+      }
+    });
 
     fetch(request)
       .then(res => res.json())
       .then(news => {
+        if (!news || news.length == 0) {
+          this.setState({loadedAll:true})
+        }
         this.setState({
           news: this.state.news? this.state.news.concat(news) : news,
+          pageNum: this.state.pageNum + 1,
         });
       });
   }

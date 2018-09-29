@@ -1,3 +1,4 @@
+import Auth from '../Auth/Auth';
 import React from 'react';
 import SignUpForm from './SignUpForm';
 
@@ -5,6 +6,7 @@ class SignUpPage extends React.Component {
   constructor(props) {
     super(props);
 
+    // set the initial component state
     this.state = {
       errors: {},
       user: {
@@ -16,6 +18,7 @@ class SignUpPage extends React.Component {
   }
 
   processForm(event) {
+    // prevent default action. in this case, action is the form submission event
     event.preventDefault();
 
     const email = this.state.user.email;
@@ -26,9 +29,42 @@ class SignUpPage extends React.Component {
     console.log('password:', password);
     console.log('confirm_password:', confirm_password);
 
-    if (password != confirm_password) {
+    if (password !== confirm_password) {
       return;
     }
+
+    // Post registeration data.
+    const url = 'http://' + window.location.hostname + ':3000/auth/signup';
+    const request = new Request(
+      url,
+      {method:'POST', headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: this.state.user.email,
+        password: this.state.user.password
+      })
+    });
+
+    fetch(request).then(response => {
+      if (response.status === 200) {
+        this.setState({
+          errors: {}
+        });
+
+        // redirect to /login
+        window.location.replace('/login');
+      } else {
+        response.json().then(json => {
+          console.log(json);
+          const errors = json.errors ? json.errors : {};
+          errors.summary = json.message;
+          console.log(this.state.errors);
+          this.setState({errors});
+        });
+      }
+    });
   }
 
   changeUser(event) {
