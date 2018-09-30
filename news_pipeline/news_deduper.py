@@ -6,6 +6,7 @@ import sys
 from dateutil import parser
 from sklearn.feature_extraction.text import TfidfVectorizer
 
+# import common package in parent directory
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 
 import mongodb_client
@@ -14,9 +15,11 @@ from cloudAMQP_client import CloudAMQPClient
 DEDUPE_NEWS_TASK_QUEUE_URL = "amqp://zzhqzyxc:a5qM8Ik5J0Y1pw6pPKuuM8o0Rs8DjvKH@otter.rmq.cloudamqp.com/zzhqzyxc"
 DEDUPE_NEWS_TASK_QUEUE_NAME = "dedupeQueue"
 
-SLEEP_TIME_IN_SECONDS = 5 * 60
+SLEEP_TIME_IN_SECONDS = 1
+
 NEWS_TABLE_NAME = "news"
-SAME_NEWS_SIMILARITY_THRESHOLD = 0.75
+
+SAME_NEWS_SIMILARITY_THRESHOLD = 0.6
 
 logger_format = '%(asctime)s - %(message)s'
 logging.basicConfig(format=logger_format)
@@ -39,15 +42,17 @@ def handle_message(msg):
     published_at_day_end = published_at_day_begin + datetime.timedelta(days=1)
 
     db = mongodb_client.get_db()
+    # only compare to the same day news for dedupe
     same_day_news_list = list(db[NEWS_TABLE_NAME].find(
-    {'publishedAt': {'$gte':published_at_day_begin,
-                     '$lt':published_at_day_end}}))
+        {'publishedAt': {'$gte':published_at_day_begin,
+                         '$lt':published_at_day_end}}))
 
     if same_day_news_list is not None and len(same_day_news_list) > 0:
         documents = [news['text'] for news in same_day_news_list]
+        # covert two news into one array for tfidf calculation
         documents.insert(0, text)
 
-        tfidf = TfidfVectorizer().fit_transfor(documents)
+        tfidf = TfidfVectorizer().fit_transform(documents)
         pairwise_sim = tfidf * tfidf.T
 
         logger.debug("Pairwise Sim:%s", str(pairwise_sim))
@@ -66,12 +71,14 @@ def run():
         if cloudAMQP_client is not None:
             msg = cloudAMQP_client.getMessage()
             if msg is not None:
+                # Parse and process the message
                 try:
                     handle_message(msg)
                 except Exception as e:
                     logger.warning(e)
                     pass
+
             cloudAMQP_client.sleep(SLEEP_TIME_IN_SECONDS)
 
-if __name__=="__main__":
+if __name__ == "__main__":
     run()

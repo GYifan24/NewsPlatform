@@ -13,6 +13,7 @@ UserSchema.methods.comparePassword = function comparePassword(password, callback
   bcrypt.compare(password, this.password, callback);
 }
 
+// pre-process password
 UserSchema.pre('save', function saveHook(next) {
   const user = this;
 

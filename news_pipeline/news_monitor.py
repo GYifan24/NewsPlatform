@@ -6,12 +6,12 @@ import sys
 import logging
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
-
 import news_api_client
 
 from cloudAMQP_client import CloudAMQPClient
 
-SLEEP_TIME_IN_SECONDS = 5 * 60
+SLEEP_TIME_IN_SECONDS = 20 * 60
+# news expired in 3 days
 NEWS_TIME_OUT_IN_SECONDS = 3600 * 24 * 3
 
 REDIS_HOST = 'localhost'
@@ -21,7 +21,17 @@ SCRAPE_NEWS_TASK_QUEUE_URL = "amqp://jeonsbco:z6ls7E4CF4HgCKMhWaOF-_f6MyIO9IzT@o
 SCRAPE_NEWS_TASK_QUEUE_NAME = "scrapeNews"
 
 NEWS_SOURCES = [
-    'cnn'
+    'bbc-news',
+    'bbc-sport',
+    'bloomberg',
+    'cnn',
+    'entertainment-weekly',
+    'espn',
+    'ign',
+    'techcrunch',
+    'the-new-york-times',
+    'the-wall-street-journal',
+    'the-washington-post'
 ]
 
 logger_format = '%(asctime)s - %(message)s'
@@ -34,7 +44,7 @@ couldAMQP_client = CloudAMQPClient(SCRAPE_NEWS_TASK_QUEUE_URL, SCRAPE_NEWS_TASK_
 
 def run():
     while True:
-        news_list =  news_api_client.getNewsFromSources(NEWS_SOURCES)
+        news_list = news_api_client.getNewsFromSources(NEWS_SOURCES)
 
         num_of_new_news = 0
 
@@ -47,10 +57,9 @@ def run():
                 news['digest'] = news_digest
                 if news['publishedAt'] is None:
                     news['publishedAt'] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-                    redis_client.set(news_digest, "True")
-                    redis_client.expire(news_digest, NEWS_TIME_OUT_IN_SECONDS)
-                    # send message to queue for next SCRAPE_NEWS_TASK_QUEUE_URL
-                    couldAMQP_client.sendMessage(news)
+                redis_client.set(news_digest, "True")
+                redis_client.expire(news_digest, NEWS_TIME_OUT_IN_SECONDS)
+                couldAMQP_client.sendMessage(news)
 
         logger.info("Fetched %d news.", num_of_new_news)
         couldAMQP_client.sleep(SLEEP_TIME_IN_SECONDS)

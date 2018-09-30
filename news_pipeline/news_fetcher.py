@@ -15,7 +15,7 @@ SCRAPE_NEWS_TASK_QUEUE_NAME = "scrapeNews"
 DEDUPE_NEWS_TASK_QUEUE_URL = "amqp://zzhqzyxc:a5qM8Ik5J0Y1pw6pPKuuM8o0Rs8DjvKH@otter.rmq.cloudamqp.com/zzhqzyxc"
 DEDUPE_NEWS_TASK_QUEUE_NAME = "dedupeQueue"
 
-SLEEP_TIME_IN_SECONDS = 5 * 60
+SLEEP_TIME_IN_SECONDS = 5
 
 logger_format = '%(asctime)s - %(message)s'
 logging.basicConfig(format=logger_format)
@@ -36,6 +36,7 @@ def handle_message(msg):
     article.download()
     article.parse()
 
+    # add text to news, news api only provides title and description
     msg['text'] = article.text
     dedupe_news_queue_client.sendMessage(msg)
 

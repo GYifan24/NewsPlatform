@@ -14,7 +14,7 @@ module.exports = new PassportLocalStrategy({
     password: password
   };
 
-  // find a user by email address
+  // find a user by email address from mongoDB(mlab)
   return User.findOne({ email: userData.email }, (err, user) => {
     if (err) { return done(err); }
 
