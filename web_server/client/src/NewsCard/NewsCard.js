@@ -29,6 +29,8 @@ class NewsCard extends React.Component{
   }
 
   render() {
+    console.log("news source: " + this.props.news.source)
+    console.log("news class: " + this.props.news.class)
     return (
       <div className="news-container" onClick={(e) => this.redirectToUrl(this.props.news.url, e)}>
         <div className='card-panel z-depth-3'>

@@ -5,9 +5,7 @@ var path = require('path');
 var index = require('./routes/index');
 var news = require('./routes/news');
 var app = express();
-app.listen(80, function() {
-  console.log('Listening on port 80');
-});
+
 var bodyParser = require('body-parser');
 app.use(bodyParser.json());
 
