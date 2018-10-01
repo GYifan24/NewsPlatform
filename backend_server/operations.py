@@ -13,6 +13,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 
 import mongodb_client
 import news_recommendation_service_client
+import news_classes
 from cloudAMQP_client import CloudAMQPClient
 
 REDIS_HOST = "localhost"
@@ -86,6 +87,8 @@ def getNewsSummariesForUser(user_id, page_num):
     for news in sliced_news:
         # Remove text field to save bandwidth.
         del news['text']
+        if 'class' in news:
+            news['class'] = news_classes.classes[news['class']]
         if 'class' in news and news['class'] == topPreference:
             news['reason'] = 'Recommend'
 
