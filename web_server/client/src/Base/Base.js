@@ -6,17 +6,16 @@ import App from '../App/App';
 import LoginPage from '../Login/LoginPage';
 import SignUpPage from '../SignUp/SignUpPage';
 import Auth from '../Auth/Auth';
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Link, withRouter  } from 'react-router-dom';
 
 import './Base.css';
 
-const logout = () => {
-  Auth.deauthenticateUser();
-  window.location.replace('/login');
-}
+// const logout = (history) => {
+//   Auth.deauthenticateUser();
+//   history.push('/login');
+// };
 
-const Base = () => (
-  <Router>
+const Base = withRouter(({ history }) => (
     <div>
       <nav className="nav-bar indigo lighten-1">
         <div className="nav-wrapper">
@@ -25,7 +24,7 @@ const Base = () => (
             {Auth.isUserAuthenticated() ?
               (<div>
                 <li>{Auth.getEmail()}</li>
-                <li><a onClick={logout}>Log out</a></li>
+                <li><a onClick={()=>{Auth.deauthenticateUser(); history.push('/login');}}>Log out</a></li>
               </div>)
               :
               (<div>
@@ -42,7 +41,6 @@ const Base = () => (
       <Route exact path="/login" component={LoginPage} />
       <Route exact path="/signup" component={SignUpPage} />
     </div>
-  </Router>
-);
+));
 
 export default Base;

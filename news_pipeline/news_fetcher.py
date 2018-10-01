@@ -15,7 +15,7 @@ SCRAPE_NEWS_TASK_QUEUE_NAME = "scrapeNews"
 DEDUPE_NEWS_TASK_QUEUE_URL = "amqp://zzhqzyxc:a5qM8Ik5J0Y1pw6pPKuuM8o0Rs8DjvKH@otter.rmq.cloudamqp.com/zzhqzyxc"
 DEDUPE_NEWS_TASK_QUEUE_NAME = "dedupeQueue"
 
-SLEEP_TIME_IN_SECONDS = 5
+SLEEP_TIME_IN_SECONDS = 10
 
 logger_format = '%(asctime)s - %(message)s'
 logging.basicConfig(format=logger_format)

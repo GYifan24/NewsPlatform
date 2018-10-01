@@ -15,7 +15,7 @@ from cloudAMQP_client import CloudAMQPClient
 DEDUPE_NEWS_TASK_QUEUE_URL = "amqp://zzhqzyxc:a5qM8Ik5J0Y1pw6pPKuuM8o0Rs8DjvKH@otter.rmq.cloudamqp.com/zzhqzyxc"
 DEDUPE_NEWS_TASK_QUEUE_NAME = "dedupeQueue"
 
-SLEEP_TIME_IN_SECONDS = 1
+SLEEP_TIME_IN_SECONDS = 15
 
 NEWS_TABLE_NAME = "news"
 
@@ -42,14 +42,12 @@ def handle_message(msg):
     published_at_day_end = published_at_day_begin + datetime.timedelta(days=1)
 
     db = mongodb_client.get_db()
-    # only compare to the same day news for dedupe
     same_day_news_list = list(db[NEWS_TABLE_NAME].find(
         {'publishedAt': {'$gte':published_at_day_begin,
                          '$lt':published_at_day_end}}))
 
     if same_day_news_list is not None and len(same_day_news_list) > 0:
         documents = [news['text'] for news in same_day_news_list]
-        # covert two news into one array for tfidf calculation
         documents.insert(0, text)
 
         tfidf = TfidfVectorizer().fit_transform(documents)
@@ -64,6 +62,14 @@ def handle_message(msg):
                 return
 
     msg['publishedAt'] = parser.parse(msg['publishedAt'])
+
+    description = msg['description']
+    if description is None:
+        description = msg['title']
+
+    topic = news_topic_modeling_service_client.classify(description)
+    msg['class'] = topic
+
     db[NEWS_TABLE_NAME].replace_one({'digest':msg['digest']}, msg, upsert=True)
 
 def run():

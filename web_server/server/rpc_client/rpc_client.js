@@ -20,12 +20,22 @@ function add(a, b, callback) {
 function getNewsSummariesForUser(user_id, page_num, callback) {
   client.request('getNewsSummariesForUser', [user_id, page_num], function(err, response) {
     if(err) throw err;
-    console.log(response.result);
+    // console.log(response.result);
     callback(response.result);
+  });
+}
+
+// Log a news click event for a user.
+function logNewsClickForUser(user_id, news_id) {
+  console.log("send click log event to backend")
+  client.request('logNewsClickForUser', [user_id, news_id], function(err, response) {
+      if (err) throw err;
+      console.log(response);
   });
 }
 
 module.exports = {
   add : add,
-  getNewsSummariesForUser : getNewsSummariesForUser
+  getNewsSummariesForUser : getNewsSummariesForUser,
+  logNewsClickForUser : logNewsClickForUser
 }

@@ -4,6 +4,7 @@ import pickle
 import redis
 import sys
 import logging
+from datetime import datetime
 
 from bson.json_util import dumps
 
@@ -11,6 +12,8 @@ from bson.json_util import dumps
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 
 import mongodb_client
+import news_recommendation_service_client
+from cloudAMQP_client import CloudAMQPClient
 
 REDIS_HOST = "localhost"
 REDIS_PORT = 6379
@@ -27,6 +30,10 @@ LOGGER_FORMAT = '%(asctime)s - %(message)s'
 logging.basicConfig(format=LOGGER_FORMAT)
 LOGGER = logging.getLogger('backend_service')
 LOGGER.setLevel(logging.DEBUG)
+
+LOG_CLICKS_TASK_QUEUE_URL = "amqp://gkhhllta:nGhWDT6xqsWbB7zSGneO40bvggkTkXhl@otter.rmq.cloudamqp.com/gkhhllta"
+LOG_CLICKS_TASK_QUEUE_NAME = "clickLog"
+cloudAMQP_client = CloudAMQPClient(LOG_CLICKS_TASK_QUEUE_URL, LOG_CLICKS_TASK_QUEUE_NAME)
 
 def getOneNews():
     db = mongodb_client.get_db()
@@ -68,8 +75,22 @@ def getNewsSummariesForUser(user_id, page_num):
 
         sliced_news = total_news[begin_index:end_index]
 
+    # # Use preference to customize returned news news_list
+    preference = news_recommendation_service_client.getPreferenceForUser(user_id)
+    topPreference = None
+
+    # print("preference modle:" + preference)
+    if preference is not None and len(preference) > 0:
+        topPreference = preference[0]
+
     for news in sliced_news:
         # Remove text field to save bandwidth.
         del news['text']
+        if 'class' in news and news['class'] == topPreference:
+            news['reason'] = 'Recommend'
 
     return json.loads(dumps(sliced_news))
+
+def logNewsClickForUser(user_id, news_id):
+    msg = {'userId':user_id, 'newsId':news_id, 'timestamp':str(datetime.utcnow())}
+    cloudAMQP_client.sendMessage(msg);

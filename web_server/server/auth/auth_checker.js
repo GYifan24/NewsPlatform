@@ -3,15 +3,16 @@ const User = require('mongoose').model('User');
 const config = require('../config/config.json');
 
 module.exports = (req, res, next) => {
-  console.log('auth_checker: req: ' + req.headers);
+  // console.log('auth_checker: req: ' + req.headers);
 
   if (!req.headers.authorization) {
+    console.log("failed autherization")
     return res.status(401).end();
   }
 
   // get the last part from a authorization header string like "bearer token-value"
   const token = req.headers.authorization.split(' ')[1];
-
+  // console.log(req)
   console.log('auth_checker: token: ' + token);
 
   // decode the token using a secret key-phrase

@@ -26,8 +26,8 @@ class NewsPanel extends React.Component {
   }
 
   loadMoreNews() {
-    console.log('Actually triggered loading more news');
-
+    // console.log('Actually triggered loading more news');
+    console.log(this.state)
     if (this.state.loadedAll == true){
       return;
     }
@@ -41,6 +41,7 @@ class NewsPanel extends React.Component {
         'Authorization': 'bearer ' + Auth.getToken(),
       }
     });
+    // console.log(request)
 
     fetch(request)
       .then(res => res.json())
@@ -57,6 +58,7 @@ class NewsPanel extends React.Component {
 
 
   renderNews() {
+    // console.log("renserNews?")
     const news_list = this.state.news.map(news => {
       return(
         <a className='list-group-item' href='#'>

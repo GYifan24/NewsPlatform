@@ -1,6 +1,7 @@
 import Auth from '../Auth/Auth';
 import React from 'react';
 import SignUpForm from './SignUpForm';
+import { BrowserRouter as Router, Route, Link, withRouter  } from 'react-router-dom';
 
 class SignUpPage extends React.Component {
   constructor(props) {
@@ -25,16 +26,16 @@ class SignUpPage extends React.Component {
     const password = this.state.user.password;
     const confirm_password = this.state.user.confirm_password;
 
-    console.log('email:', email);
-    console.log('password:', password);
-    console.log('confirm_password:', confirm_password);
+    // console.log('email:', email);
+    // console.log('password:', password);
+    // console.log('confirm_password:', confirm_password);
 
     if (password !== confirm_password) {
       return;
     }
 
     // Post registeration data.
-    const url = 'http://' + window.location.hostname + ':3000/auth/signup';
+    const url = 'http://' + window.location.host + '/auth/signup';
     const request = new Request(
       url,
       {method:'POST', headers: {
@@ -52,9 +53,8 @@ class SignUpPage extends React.Component {
         this.setState({
           errors: {}
         });
-
-        // redirect to /login
-        window.location.replace('/login');
+        // change the current URL to /login
+        this.props.history.push('/login')
       } else {
         response.json().then(json => {
           console.log(json);
