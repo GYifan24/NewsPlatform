@@ -15,8 +15,8 @@ cd ../../backend_server
 python3 service.py &
 
 # Launch recommendation server
-cd ../news_recommendation_service
-python3 recommendation_service.py &
+cd ../recommendation_service
+python3 service.py &
 python3 click_log_processor.py &
 
 echo "=================================================="
