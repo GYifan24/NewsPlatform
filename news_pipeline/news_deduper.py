@@ -12,8 +12,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 import mongodb_client
 from cloudAMQP_client import CloudAMQPClient
 
-DEDUPE_NEWS_TASK_QUEUE_URL = "amqp://zzhqzyxc:a5qM8Ik5J0Y1pw6pPKuuM8o0Rs8DjvKH@otter.rmq.cloudamqp.com/zzhqzyxc"
-DEDUPE_NEWS_TASK_QUEUE_NAME = "dedupeQueue"
+SCRAPE_NEWS_TASK_QUEUE_URL = "amqp://jeonsbco:z6ls7E4CF4HgCKMhWaOF-_f6MyIO9IzT@otter.rmq.cloudamqp.com/jeonsbco"
+SCRAPE_NEWS_TASK_QUEUE_NAME = "scrapeNews"
+
 
 SLEEP_TIME_IN_SECONDS = 15
 
@@ -26,14 +27,14 @@ logging.basicConfig(format=logger_format)
 logger = logging.getLogger('news_deduper')
 logger.setLevel(logging.DEBUG)
 
-cloudAMQP_client = CloudAMQPClient(DEDUPE_NEWS_TASK_QUEUE_URL, DEDUPE_NEWS_TASK_QUEUE_NAME)
+cloudAMQP_client = CloudAMQPClient(SCRAPE_NEWS_TASK_QUEUE_URL, SCRAPE_NEWS_TASK_QUEUE_NAME)
 
 def handle_message(msg):
     if not isinstance(msg, dict):
         logger.warning('message is broken')
         return
 
-    text = msg['text']
+    text = msg['description']
     if text is None:
         return
 
@@ -47,7 +48,7 @@ def handle_message(msg):
                          '$lt':published_at_day_end}}))
 
     if same_day_news_list is not None and len(same_day_news_list) > 0:
-        documents = [news['text'] for news in same_day_news_list]
+        documents = [news['description'] for news in same_day_news_list]
         documents.insert(0, text)
 
         tfidf = TfidfVectorizer().fit_transform(documents)
@@ -67,8 +68,8 @@ def handle_message(msg):
     if description is None:
         description = msg['title']
 
-    topic = news_topic_modeling_service_client.classify(description)
-    msg['class'] = topic
+    # topic = news_topic_modeling_service_client.classify(description)
+    # msg['class'] = topic
 
     db[NEWS_TABLE_NAME].replace_one({'digest':msg['digest']}, msg, upsert=True)
 
