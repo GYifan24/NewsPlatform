@@ -87,8 +87,6 @@ def getNewsSummariesForUser(user_id, page_num):
         topPreference = preference[0]
 
     for news in sliced_news:
-        # Remove text field to save bandwidth.
-        del news['text']
         if 'class' in news and news['class'] == topPreference:
             news['reason'] = 'Recommend'
 

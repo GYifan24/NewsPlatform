@@ -30,7 +30,7 @@ function logNewsClickForUser(user_id, news_id) {
   console.log("send click log event to backend")
   client.request('logNewsClickForUser', [user_id, news_id], function(err, response) {
       if (err) throw err;
-      console.log(response);
+      // console.log(response);
   });
 }
 

@@ -35,7 +35,7 @@ def getPreferenceForUser(userId):
     # no sense.
     if isclose(float(sorted_value_list[0]), float(sorted_value_list[-1])):
         return []
-    print(sorted_list)
+    # print(sorted_list)
     return sorted_list
 
 
