@@ -26,7 +26,7 @@ class CloudAMQPClient:
         self.channel.basic_publish(exchange='',
                                   routing_key=self.queue_name,
                                   body=json.dumps(message))
-        logger.debug("[x] send message to %s:%s", self.queue_name, message)
+        # logger.debug("[x] send message to %s:%s", self.queue_name, message)
 
 
     def getMessage(self):
@@ -35,7 +35,7 @@ class CloudAMQPClient:
         """
         method_frame, header_frame, body = self.channel.basic_get(self.queue_name)
         if method_frame:
-            logger.debug("[x] Received message from %s:%s", self.queue_name, body)
+            # logger.debug("[x] Received message from %s:%s", self.queue_name, body)
             self.channel.basic_ack(method_frame.delivery_tag)
             return json.loads(body.decode('utf-8'))
         else:
