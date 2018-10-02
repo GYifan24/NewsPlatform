@@ -44,6 +44,7 @@ def getOneNews():
 
 
 def getNewsSummariesForUser(user_id, page_num):
+
     page_num = int(page_num)
 
     if page_num <= 0:
@@ -54,8 +55,9 @@ def getNewsSummariesForUser(user_id, page_num):
 
     # The final list of news to be returned.
     sliced_news = []
-    db = mongodb_client.get_db()
 
+    # LOGGER.debug(mongodb_client)
+    db = mongodb_client.get_db()
 
     if redis_client.get(user_id) is not None:
         LOGGER.debug("user exist in redis")
@@ -87,8 +89,6 @@ def getNewsSummariesForUser(user_id, page_num):
     for news in sliced_news:
         # Remove text field to save bandwidth.
         del news['text']
-        if 'class' in news:
-            news['class'] = news_classes.classes[news['class']]
         if 'class' in news and news['class'] == topPreference:
             news['reason'] = 'Recommend'
 

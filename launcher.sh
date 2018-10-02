@@ -1,4 +1,5 @@
 #!/bin/bash
+sudo service mongod restart
 pip install -r requirements.txt
 
 # Launch UI Server

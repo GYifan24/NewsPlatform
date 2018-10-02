@@ -27,8 +27,6 @@ NEWS_SOURCES = [
     'cnn',
     'entertainment-weekly',
     'espn',
-    'ign',
-    'techcrunch',
     'the-new-york-times',
     'the-wall-street-journal',
     'the-washington-post'
