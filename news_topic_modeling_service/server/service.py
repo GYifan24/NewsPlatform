@@ -1,115 +1,37 @@
 import news_classes
 import numpy as np
 import os
+from os.path import join
+from os.path import normpath
 import pandas as pd
 import pickle
 import sys
-import tensorflow as tf
 import time
-
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
 from jsonrpclib.SimpleJSONRPCServer import SimpleJSONRPCServer
-from nltk.corpus import stopwords
-from nltk.stem.porter import PorterStemmer
-from nltk.tokenize import word_tokenize
-from tensorflow.contrib.learn.python.learn.estimators import model_fn
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
 
 # import packages in trainer
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'trainer'))
-import news_cnn_model
-
-learn = tf.contrib.learn
 
 SERVER_HOST = 'localhost'
 SERVER_PORT = 6060
 
-MODEL_DIR = '../model'
-MODEL_UPDATE_LAG_IN_SECONDS = 10
-
-N_CLASSES = 8
-
-VARS_FILE = '../model/vars'
-VOCAB_PROCESSOR_SAVE_FILE = '../model/vocab_procesor_save_file'
-
-n_words = 0
-
-MAX_DOCUMENT_LENGTH = 500
-vocab_processor = None
-
-classifier = None
-
-stemmer = PorterStemmer()
-stop_words = set(stopwords.words('english'))
-
-def restoreVars():
-    with open(VARS_FILE, 'rb') as f:
-        global n_words
-        n_words = pickle.load(f)
-
-    global vocab_processor
-    vocab_processor = learn.preprocessing.VocabularyProcessor.restore(
-        VOCAB_PROCESSOR_SAVE_FILE)
-
-
-def loadModel():
-    global classifier
-    classifier = learn.Estimator(
-        model_fn=news_cnn_model.generate_cnn_model(N_CLASSES, n_words),
-        model_dir=MODEL_DIR)
-    # Prepare training and testing
-    df = pd.read_csv('../data/labeled_news.csv', header=None)
-
-    # TODO: fix this until https://github.com/tensorflow/tensorflow/issues/5548 is solved.
-    # We have to call evaluate or predict at least once to make the restored Estimator work.
-    train_df = df[0:400]
-    x_train = train_df[1]
-    x_train = np.array(list(vocab_processor.transform(x_train)))
-    y_train = train_df[0]
-    classifier.evaluate(x_train, y_train)
-
-    print("Model update.")
-
-
-restoreVars()
-loadModel()
-
-print("Model loaded.")
-
-
-class ReloadModelHandler(FileSystemEventHandler):
-    def on_any_event(self, event):
-        # Reload model
-        print("Model update detected. Loading new model.")
-        time.sleep(MODEL_UPDATE_LAG_IN_SECONDS)
-        retoreVars()
-        loadModel()
-
-
-# Setup watchdog
-observer = Observer()
-observer.schedule(ReloadModelHandler(), path=MODEL_DIR, recursive=False)
-observer.start()
-
+FEATURE_OUTPUT_FILE = normpath(join(os.path.dirname(__file__), '../model/feature.sav'))
+MODEL_FILE = normpath(join(os.path.dirname(__file__), '../model/model.sav'))
+model = pickle.load(open(MODEL_FILE, 'rb'))
 
 def classify(text):
-    # preprocess input document
-    text_tokens = word_tokenize(text)
-    stemmed_tokens = [stemmer.stem(w.lower()) for w in text_tokens if not w in stop_words]
-    norm_sentence = ' '.join(stemmed_tokens)
+    loaded_tfidf = TfidfVectorizer(sublinear_tf=True, min_df=5, norm='l2',
+        encoding='latin-1', ngram_range=(1, 2), stop_words='english', vocabulary=pickle.load(open(FEATURE_OUTPUT_FILE, "rb")))
 
-    text_series = pd.Series([norm_sentence])
-    predict_x = np.array(list(vocab_processor.transform(text_series)))
-    print(predict_x)
+    features = loaded_tfidf.fit_transform(text).toarray()
 
-    y_predicted = [
-        p['class'] for p in classifier.predict(
-            predict_x, as_iterable=True)
-    ]
-    print(y_predicted[0])
-    topic = news_classes.class_map[str(y_predicted[0])]
+
+    y_pred = model.predict(features)
+    topic = news_classes.class_map[str(y_pred[0])]
     return topic
-
 
 # Threading RPC Server
 RPC_SERVER = SimpleJSONRPCServer((SERVER_HOST, SERVER_PORT))

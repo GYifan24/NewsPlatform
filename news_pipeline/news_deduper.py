@@ -11,6 +11,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 
 import mongodb_client
 from cloudAMQP_client import CloudAMQPClient
+import news_topic_modeling_service_client
 
 SCRAPE_NEWS_TASK_QUEUE_URL = "amqp://jeonsbco:z6ls7E4CF4HgCKMhWaOF-_f6MyIO9IzT@otter.rmq.cloudamqp.com/jeonsbco"
 SCRAPE_NEWS_TASK_QUEUE_NAME = "scrapeNews"
@@ -68,9 +69,9 @@ def handle_message(msg):
     if description is None:
         description = msg['title']
 
-    # topic = news_topic_modeling_service_client.classify(description)
-    # msg['class'] = topic
-
+    topic = news_topic_modeling_service_client.classify(description)
+    msg['class'] = topic
+    print("news topic: " + topic)
     db[NEWS_TABLE_NAME].replace_one({'digest':msg['digest']}, msg, upsert=True)
 
 def run():
