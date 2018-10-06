@@ -6,6 +6,14 @@ pip install -r requirements.txt
 cd backend_server
 python3 service.py &
 
+# Launch news modeling Server
+cd ../news_topic_modeling_service
+cd trainer
+python3 news_trainer.py
+cd ../server
+python3 service.py &
+
+
 # Launch recommendation server
 cd ../recommendation_service
 python3 service.py &
