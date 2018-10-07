@@ -30,7 +30,7 @@ NUM_OF_CLASSES = 8
 INITIAL_P = 1.0 / NUM_OF_CLASSES
 ALPHA = 0.1
 
-SLEEP_TIME_IN_SECONDS = 60
+SLEEP_TIME_IN_SECONDS = 5
 
 LOG_CLICKS_TASK_QUEUE_URL = "amqp://gkhhllta:nGhWDT6xqsWbB7zSGneO40bvggkTkXhl@otter.rmq.cloudamqp.com/gkhhllta"
 LOG_CLICKS_TASK_QUEUE_NAME = "clickLog"

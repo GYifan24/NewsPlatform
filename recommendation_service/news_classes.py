@@ -1,10 +1,7 @@
 classes = [
-    "World",
-    "Politics",
     "Business",
-    "Technology",
     "Entertainment",
-    "Sports",
-    "Health",
-    "Crime",
+    "Politics",
+    "Sport",
+    "Technology"
 ]

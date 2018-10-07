@@ -25,11 +25,12 @@ python3 news_deduper.py &
 
 # Launch UI Server
 cd ../web_server
-cd client
-npm install
-npm run build
-cd ../server
-npm install
+# cd client
+# npm install
+# npm run build
+# cd ../server
+cd server
+# npm install
 npm start &
 
 echo "=================================================="
