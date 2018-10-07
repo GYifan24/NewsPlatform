@@ -15,7 +15,7 @@ python3 service.py &
 
 
 # Launch recommendation server
-cd ../recommendation_service
+cd ../../recommendation_service
 python3 service.py &
 python3 click_log_processor.py &
 

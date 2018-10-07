@@ -11,17 +11,16 @@ import os
 from os.path import join
 from os.path import normpath
 
-FEATURE_OUTPUT_FILE = normpath(join(os.path.dirname(__file__), '../model/feature.sav'))
+TFIDF_OUTPUT_FILE = normpath(join(os.path.dirname(__file__), '../model/tfidf.sav'))
 MODEL_FILE = normpath(join(os.path.dirname(__file__), '../model/model.sav'))
 
 
 model = pickle.load(open(MODEL_FILE, 'rb'))
 
 def classify(text):
-    loaded_tfidf = TfidfVectorizer(sublinear_tf=True, min_df=5, norm='l2',
-        encoding='latin-1', ngram_range=(1, 2), stop_words='english', vocabulary=pickle.load(open(FEATURE_OUTPUT_FILE, "rb")))
+    loaded_tfidf = pickle.load(open(TFIDF_OUTPUT_FILE, "rb"))
 
-    features = loaded_tfidf.fit_transform(text).toarray()
+    features = loaded_tfidf.transform(text).toarray()
 
 
     y_pred = model.predict(features)

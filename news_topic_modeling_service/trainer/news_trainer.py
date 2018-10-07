@@ -10,14 +10,14 @@ from os.path import join
 from os.path import normpath
 
 MODEL_OUTPUT_FILE = normpath(join(os.path.dirname(__file__), '../model/model.sav'))
-FEATURE_OUTPUT_FILE = normpath(join(os.path.dirname(__file__), '../model/feature.sav'))
+TFIDF_OUTPUT_FILE = normpath(join(os.path.dirname(__file__), '../model/tfidf.sav'))
 DATA_SET_FILE = normpath(join(os.path.dirname(__file__), '../data/data.csv'))
 
 
 def run() :
     df = pd.read_csv(DATA_SET_FILE, header=None)
     tfidf = TfidfVectorizer(sublinear_tf=True, min_df=5, norm='l2',
-    encoding='latin-1', ngram_range=(1, 2), stop_words='english')
+        encoding='latin-1', ngram_range=(1, 2), stop_words='english')
 
     # df[0]: label df[1]: title df[2]: description
     features = tfidf.fit_transform(df[1]).toarray()
@@ -38,7 +38,7 @@ def run() :
 
     # save models
     pickle.dump(model, open(MODEL_OUTPUT_FILE, 'wb'))
-    pickle.dump(tfidf.vocabulary_, open(FEATURE_OUTPUT_FILE, 'wb'))
+    pickle.dump(tfidf, open(TFIDF_OUTPUT_FILE, 'wb'))
 
 if __name__ == "__main__":
     run()
